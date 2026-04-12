@@ -5,7 +5,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { getCameras } from "../api/cameras";
 import CameraCard from "../features/camera-catalog/components/CameraCard";
 import FilterSidebar from "../features/camera-catalog/components/FilterSidebar";
@@ -13,14 +13,11 @@ import { useCameraFilters } from "../features/camera-catalog/hooks/useCameraFilt
 import LoadingState from "../components/common/LoadingState";
 import ErrorState from "../components/common/ErrorState";
 import EmptyState from "../components/common/EmptyState";
-import type { Camera } from "../types/api";
 
 export default function CameraListPage() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
   const [page, setPage] = useState(1);
-  const [compareItems, setCompareItems] = useState<Camera[]>([]);
   const { filters, setFilters, reset } = useCameraFilters();
 
   const queryKey = ["cameras", filters, search, page];
@@ -37,20 +34,6 @@ export default function CameraListPage() {
         release_year_max: filters.release_year_max < new Date().getFullYear() ? filters.release_year_max : undefined,
       }),
   });
-
-  const handleCompare = (camera: Camera) => {
-    const already = compareItems.find((c) => c.id === camera.id);
-    if (already) {
-      setCompareItems((items) => items.filter((c) => c.id !== camera.id));
-    } else if (compareItems.length < 2) {
-      const updated = [...compareItems, camera];
-      if (updated.length === 2) {
-        navigate(`/compare?left=${updated[0].slug}&right=${updated[1].slug}`);
-      } else {
-        setCompareItems(updated);
-      }
-    }
-  };
 
   const totalPages = data ? Math.ceil(data.count / 20) : 1;
 
@@ -73,14 +56,6 @@ export default function CameraListPage() {
         <FilterSidebar filters={filters} onChange={(f) => { setFilters(f); setPage(1); }} onReset={reset} />
 
         <Box sx={{ flex: 1 }}>
-          {compareItems.length === 1 && (
-            <Paper sx={{ p: 1.5, mb: 2, bgcolor: "info.light" }}>
-              <Typography variant="body2">
-                Selected: <strong>{compareItems[0].full_name}</strong> — pick one more to compare.
-              </Typography>
-            </Paper>
-          )}
-
           {isLoading ? (
             <LoadingState />
           ) : isError ? (
@@ -88,14 +63,10 @@ export default function CameraListPage() {
           ) : data?.results.length === 0 ? (
             <EmptyState message="No cameras match your filters." />
           ) : (
-            <Grid container spacing={3}>
+            <Grid container spacing={2}>
               {data?.results.map((camera) => (
-                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={camera.id}>
-                  <CameraCard
-                    camera={camera}
-                    onCompare={handleCompare}
-                    compareMode={compareItems.some((c) => c.id === camera.id)}
-                  />
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={camera.id}>
+                  <CameraCard camera={camera} />
                 </Grid>
               ))}
             </Grid>

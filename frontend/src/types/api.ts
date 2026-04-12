@@ -36,9 +36,21 @@ export interface Camera {
   short_summary: string;
   hero_image: string | null;
   official_url: string;
+  overall_score?: number | null;
+}
+
+export interface Lens {
+  id: number;
+  name: string;
+  mount: string;
+  focal_length: string;
+  max_aperture: string;
+  lens_type: string;
+  official_url: string;
 }
 
 export interface CameraDetail extends Camera {
+  updated_at: string;
   announcement_date: string | null;
   gallery_images: GalleryImage[];
   sensor_spec: SensorSpec | null;
@@ -46,6 +58,11 @@ export interface CameraDetail extends Camera {
   body_spec: BodySpec | null;
   autofocus_spec: AutofocusSpec | null;
   connectivity_spec: ConnectivitySpec | null;
+  series: string;
+  pros: string;
+  cons: string;
+  series_cameras: Camera[];
+  popular_lenses: Lens[];
 }
 
 export interface GalleryImage {
@@ -64,16 +81,25 @@ export interface SensorSpec {
   max_photo_resolution: string;
   native_iso_min: number | null;
   native_iso_max: number | null;
+  extended_iso_min: number | null;
+  extended_iso_max: number | null;
   ibis: boolean;
+  ibis_stops: number | null;
 }
 
 export interface VideoSpec {
   max_video_resolution: string;
   max_4k_fps: number | null;
   max_fhd_fps: number | null;
+  high_speed_video_fps: number | null;
   raw_video: boolean;
   internal_10bit: boolean;
+  unlimited_recording: boolean;
+  digital_is: boolean;
+  lens_breathing_correction: boolean;
   log_profiles: string;
+  recording_limit_min: number | null;
+  overheating_notes: string;
   mic_in: boolean;
   headphone_out: boolean;
   hdmi_type: string;
@@ -89,16 +115,40 @@ export interface BodySpec {
   battery_shots_cipa: number | null;
   articulating_screen: boolean;
   touchscreen: boolean;
+  screen_size_inches: number | null;
+  screen_resolution_kdots: number | null;
   evf: boolean;
+  evf_resolution: string;
+  evf_coverage_pct: number | null;
+  evf_magnification: number | null;
   dual_card_slots: boolean;
+  built_in_flash: boolean;
+  max_shutter_mech: string;
+  max_shutter_electronic: string;
+  max_flash_sync: string;
+  metering_multi_segment: boolean;
+  metering_spot: boolean;
+  metering_center_weighted: boolean;
+  metering_partial: boolean;
+  ae_bracketing: boolean;
+  wb_bracketing: boolean;
+  timelapse: boolean;
+  gps: boolean;
 }
 
 export interface AutofocusSpec {
   phase_detect: boolean;
+  af_contrast_detect: boolean;
+  af_touch: boolean;
   af_points: number | null;
+  af_coverage_pct: number | null;
   eye_af_human: boolean;
+  face_detection: boolean;
   eye_af_animal: boolean;
   subject_tracking: boolean;
+  vehicle_tracking: boolean;
+  insect_tracking: boolean;
+  min_focus_ev: number | null;
   burst_fps_mech: number | null;
   burst_fps_electronic: number | null;
 }
@@ -109,6 +159,9 @@ export interface ConnectivitySpec {
   usb_c: boolean;
   usb_charging: boolean;
   webcam_mode: boolean;
+  ethernet: boolean;
+  flash_sync_port: boolean;
+  full_size_hdmi: boolean;
 }
 
 export interface Review {
@@ -169,17 +222,13 @@ export interface FieldDiff {
   section: string;
   field: string;
   label: string;
-  left: string;
-  right: string;
-  winner: "left" | "right" | "tie";
+  values: string[];       // one per camera, indexed by position
+  best_indices: number[]; // indices of the winning camera(s)
 }
 
 export interface CompareResult {
-  overview: {
-    left: { id: number; name: string; slug: string; hero_image: string | null };
-    right: { id: number; name: string; slug: string; hero_image: string | null };
-  };
-  winner_by_section: Record<string, "left" | "right" | "tie">;
+  cameras: { id: number; name: string; slug: string; hero_image: string | null; msrp: string | null }[];
+  winner_by_section: Record<string, number[]>; // winning camera indices per section ([] = all tied)
   field_diffs: FieldDiff[];
 }
 
@@ -193,4 +242,25 @@ export interface PaginatedResponse<T> {
 export interface TokenResponse {
   access: string;
   refresh: string;
+}
+
+export interface SamplePhoto {
+  id: number;
+  camera: number;
+  image: string;
+  title: string;
+  description: string;
+  taken_by: string;
+  lens_name: string;
+  focal_length: string;
+  shutter_speed: string;
+  aperture: string;
+  iso: string;
+  width_px: number | null;
+  height_px: number | null;
+  uploaded_by: number | null;
+  uploaded_by_username: string | null;
+  likes_count: number;
+  is_published: boolean;
+  created_at: string;
 }

@@ -48,9 +48,9 @@ export default function HomePage() {
       {isLoading ? (
         <LoadingState />
       ) : (
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           {data?.results.slice(0, 6).map((camera) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={camera.id}>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={camera.id}>
               <CameraCard camera={camera} />
             </Grid>
           ))}

@@ -1,63 +1,93 @@
 import {
-  Card, CardMedia, CardContent, CardActions, Typography,
-  Chip, Button, Box,
+  Card, CardActionArea, CardContent, CardActions,
+  Typography, Button, Box,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
+import { useNavigate } from "react-router-dom";
 import type { Camera } from "../../../types/api";
-import { formatPrice } from "../../../lib/format";
+import { useCompareTray } from "../../../context/useCompareTray";
 
 interface Props {
   camera: Camera;
-  onCompare?: (camera: Camera) => void;
-  compareMode?: boolean;
 }
 
-export default function CameraCard({ camera, onCompare, compareMode }: Props) {
+export default function CameraCard({ camera }: Props) {
+  const { isSelected, toggle, isFull } = useCompareTray();
+  const navigate = useNavigate();
+  const selected = isSelected(camera.slug);
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggle({ slug: camera.slug, name: camera.full_name, image: camera.hero_image ?? null });
+  };
+
   return (
-    <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <CardMedia
-        component="img"
-        height={200}
-        image={camera.hero_image ?? "/placeholder-camera.jpg"}
-        alt={camera.full_name}
-        sx={{ objectFit: "contain", bgcolor: "grey.50", p: 1 }}
-      />
-      <CardContent sx={{ flex: 1 }}>
-        <Typography variant="caption" color="text.secondary">
-          {camera.brand.name}
-        </Typography>
-        <Typography variant="h6" sx={{ fontWeight: 600 }} gutterBottom>
-          {camera.model_name}
-        </Typography>
-        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1 }}>
-          <Chip label={camera.category} size="small" color="primary" variant="outlined" />
-          {camera.mount && <Chip label={camera.mount} size="small" variant="outlined" />}
-          {camera.status !== "active" && (
-            <Chip label={camera.status} size="small" color="warning" />
+    <Card sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Clickable area — entire card navigates to detail page */}
+      <CardActionArea
+        onClick={() => navigate(`/cameras/${camera.slug}`)}
+        sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "stretch" }}
+      >
+        {/* Image with score badge */}
+        <Box sx={{ position: "relative", bgcolor: "grey.50" }}>
+          <Box
+            component="img"
+            src={camera.hero_image ?? "/placeholder-camera.svg"}
+            alt={camera.full_name}
+            sx={{
+              width: "100%",
+              aspectRatio: "16/9",
+              objectFit: "contain",
+              display: "block",
+              p: 1,
+            }}
+          />
+          {camera.overall_score != null && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 8,
+                left: 8,
+                bgcolor: "#e57373",
+                color: "#fff",
+                borderRadius: 1,
+                px: 0.75,
+                py: 0.25,
+                lineHeight: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <Typography sx={{ fontSize: "0.6rem", fontWeight: 600, lineHeight: 1.2 }}>Score</Typography>
+              <Typography sx={{ fontSize: "1rem", fontWeight: 800, lineHeight: 1 }}>{camera.overall_score}</Typography>
+            </Box>
           )}
         </Box>
-        {camera.current_price_estimate && (
-          <Typography variant="body2" color="text.secondary">
-            ~{formatPrice(camera.current_price_estimate)}
+
+        <CardContent sx={{ flex: 1, pb: 1 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.3 }}>
+            {camera.brand.name} {camera.model_name}
           </Typography>
-        )}
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }} noWrap>
-          {camera.short_summary}
-        </Typography>
-      </CardContent>
-      <CardActions>
-        <Button size="small" component={Link} to={`/cameras/${camera.slug}`}>
-          View specs
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }} noWrap>
+            {camera.short_summary}
+          </Typography>
+        </CardContent>
+      </CardActionArea>
+
+      {/* Compare button */}
+      <CardActions sx={{ pt: 0, px: 2, pb: 1.5 }}>
+        <Button
+          fullWidth
+          variant={selected ? "contained" : "outlined"}
+          color={selected ? "primary" : "inherit"}
+          startIcon={<CompareArrowsIcon />}
+          disabled={!selected && isFull}
+          onClick={handleToggle}
+          sx={{ fontWeight: 600 }}
+        >
+          {selected ? "Added to Compare" : isFull ? "Tray full" : "Compare"}
         </Button>
-        {onCompare && (
-          <Button
-            size="small"
-            variant={compareMode ? "contained" : "outlined"}
-            onClick={() => onCompare(camera)}
-          >
-            {compareMode ? "Selected" : "Compare"}
-          </Button>
-        )}
       </CardActions>
     </Card>
   );

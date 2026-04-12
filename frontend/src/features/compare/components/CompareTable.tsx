@@ -3,26 +3,29 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, Box, Switch, FormControlLabel, Chip,
 } from "@mui/material";
-import type { FieldDiff } from "../../../types/api";
+import type { FieldDiff, CompareResult } from "../../../types/api";
 
 interface Props {
   diffs: FieldDiff[];
-  leftName: string;
-  rightName: string;
+  cameras: CompareResult["cameras"];
 }
 
 const SECTION_LABELS: Record<string, string> = {
   sensor: "Sensor",
-  video: "Video",
-  body: "Body",
+  screen: "Screen & Viewfinder",
   autofocus: "Autofocus",
+  shooting: "Shooting",
+  video: "Video",
   connectivity: "Connectivity",
+  physical: "Physical",
 };
 
-export default function CompareTable({ diffs, leftName, rightName }: Props) {
+const COL_COLORS = ["primary.main", "secondary.main", "success.main", "warning.main"];
+
+export default function CompareTable({ diffs, cameras }: Props) {
   const [onlyDiffs, setOnlyDiffs] = useState(false);
 
-  const filtered = onlyDiffs ? diffs.filter((d) => d.winner !== "tie") : diffs;
+  const filtered = onlyDiffs ? diffs.filter((d) => d.best_indices.length < cameras.length) : diffs;
 
   const grouped = filtered.reduce<Record<string, FieldDiff[]>>((acc, diff) => {
     (acc[diff.section] ??= []).push(diff);
@@ -40,50 +43,46 @@ export default function CompareTable({ diffs, leftName, rightName }: Props) {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Spec</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700, color: "primary.main" }}>
-                {leftName}
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700, color: "secondary.main" }}>
-                {rightName}
-              </TableCell>
+              <TableCell sx={{ fontWeight: 700, minWidth: 160 }}>Spec</TableCell>
+              {cameras.map((cam, idx) => (
+                <TableCell key={cam.id} align="center" sx={{ fontWeight: 700, color: COL_COLORS[idx] }}>
+                  {cam.name}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>
             {Object.entries(grouped).map(([section, rows]) => (
               <Fragment key={section}>
                 <TableRow>
-                  <TableCell colSpan={3} sx={{ bgcolor: "grey.100", fontWeight: 700, py: 0.5 }}>
+                  <TableCell
+                    colSpan={1 + cameras.length}
+                    sx={{ bgcolor: "grey.100", fontWeight: 700, py: 0.5 }}
+                  >
                     {SECTION_LABELS[section] ?? section}
                   </TableCell>
                 </TableRow>
                 {rows.map((diff) => (
                   <TableRow key={diff.field} hover>
                     <TableCell>{diff.label}</TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{
-                        fontWeight: diff.winner === "left" ? 700 : 400,
-                        color: diff.winner === "left" ? "primary.main" : "inherit",
-                      }}
-                    >
-                      {diff.left}
-                      {diff.winner === "left" && (
-                        <Chip label="✓" size="small" color="primary" sx={{ ml: 1, height: 18 }} />
-                      )}
-                    </TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{
-                        fontWeight: diff.winner === "right" ? 700 : 400,
-                        color: diff.winner === "right" ? "secondary.main" : "inherit",
-                      }}
-                    >
-                      {diff.right}
-                      {diff.winner === "right" && (
-                        <Chip label="✓" size="small" color="secondary" sx={{ ml: 1, height: 18 }} />
-                      )}
-                    </TableCell>
+                    {cameras.map((cam, idx) => {
+                      const isWinner = diff.best_indices.includes(idx);
+                      return (
+                        <TableCell
+                          key={cam.id}
+                          align="center"
+                          sx={{
+                            fontWeight: isWinner ? 700 : 400,
+                            color: isWinner ? COL_COLORS[idx] : "inherit",
+                          }}
+                        >
+                          {diff.values[idx] ?? "—"}
+                          {isWinner && diff.best_indices.length < cameras.length && (
+                            <Chip label="✓" size="small" sx={{ ml: 0.5, height: 18, bgcolor: COL_COLORS[idx], color: "white" }} />
+                          )}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))}
               </Fragment>

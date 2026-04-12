@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f0f0f0"/>
+  <!-- Camera body -->
+  <rect x="60" y="90" width="280" height="160" rx="18" fill="#d0d0d0" stroke="#b0b0b0" stroke-width="3"/>
+  <!-- Viewfinder hump -->
+  <rect x="130" y="68" width="90" height="36" rx="10" fill="#d0d0d0" stroke="#b0b0b0" stroke-width="3"/>
+  <!-- Lens circle outer -->
+  <circle cx="185" cy="175" r="58" fill="#c0c0c0" stroke="#a0a0a0" stroke-width="3"/>
+  <!-- Lens circle inner -->
+  <circle cx="185" cy="175" r="42" fill="#a8a8a8" stroke="#909090" stroke-width="2"/>
+  <!-- Lens glass -->
+  <circle cx="185" cy="175" r="28" fill="#888" stroke="#707070" stroke-width="2"/>
+  <circle cx="185" cy="175" r="14" fill="#666"/>
+  <!-- Shutter button -->
+  <circle cx="295" cy="105" r="12" fill="#b0b0b0" stroke="#909090" stroke-width="2"/>
+  <!-- Flash / grip details -->
+  <rect x="270" y="130" width="50" height="8" rx="4" fill="#b8b8b8"/>
+  <rect x="270" y="145" width="40" height="6" rx="3" fill="#b8b8b8"/>
+  <!-- Highlight on lens -->
+  <circle cx="175" cy="165" r="6" fill="rgba(255,255,255,0.3)"/>
+  <!-- Text -->
+  <text x="200" y="268" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#999">No image available</text>
+</svg>

@@ -1,18 +1,20 @@
-import { useState } from "react";
 import {
-  Box, Tabs, Tab, Table, TableBody, TableCell, TableRow, TableContainer,
-  Paper,
+  Table, TableBody, TableCell, TableRow, TableContainer, Paper,
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import { Fragment } from "react";
+import type { ReactNode } from "react";
 
 interface SpecRow {
   label: string;
   value: string | number | boolean | null;
 }
 
-interface TabData {
+export interface TabData {
   label: string;
+  anchor?: string;
+  description?: string | ReactNode;
   rows: SpecRow[];
 }
 
@@ -29,29 +31,57 @@ function SpecValue({ value }: { value: string | number | boolean | null }) {
 }
 
 export default function CameraSpecsTabs({ tabs }: Props) {
-  const [tab, setTab] = useState(0);
-
   return (
-    <Box>
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 2 }}>
-        {tabs.map((t, i) => <Tab key={i} label={t.label} />)}
-      </Tabs>
-      <TableContainer component={Paper} variant="outlined">
-        <Table size="small">
-          <TableBody>
-            {tabs[tab]?.rows.map((row, i) => (
-              <TableRow key={i} hover>
-                <TableCell sx={{ fontWeight: 500, width: "45%", color: "text.secondary" }}>
-                  {row.label}
-                </TableCell>
-                <TableCell>
-                  <SpecValue value={row.value} />
+    <TableContainer component={Paper} variant="outlined">
+      <Table size="small">
+        <TableBody>
+          {tabs.map((section) => (
+            <Fragment key={section.anchor ?? section.label}>
+              <TableRow id={section.anchor}>
+                <TableCell
+                  colSpan={2}
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    bgcolor: "grey.100",
+                    py: 1.25,
+                    borderTop: "2px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  {section.label}
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+              {section.description && (
+                <TableRow>
+                  <TableCell
+                    colSpan={2}
+                    sx={{
+                      py: 0.75,
+                      color: "text.secondary",
+                      fontSize: "0.8rem",
+                      fontStyle: "italic",
+                      bgcolor: "grey.50",
+                    }}
+                  >
+                    {section.description}
+                  </TableCell>
+                </TableRow>
+              )}
+              {section.rows.map((row, j) => (
+                <TableRow key={j} hover>
+                  <TableCell sx={{ fontWeight: 500, width: "45%", color: "text.secondary" }}>
+                    {row.label}
+                  </TableCell>
+                  <TableCell>
+                    <SpecValue value={row.value} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </Fragment>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

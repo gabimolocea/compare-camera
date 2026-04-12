@@ -1,5 +1,5 @@
 import apiClient from "./client";
-import type { Camera, CameraDetail, PaginatedResponse, CompareResult } from "../types/api";
+import type { Camera, CameraDetail, PaginatedResponse, CompareResult, SamplePhoto } from "../types/api";
 
 export interface CameraFilters {
   brand?: string;
@@ -36,9 +36,32 @@ export async function getBrands() {
   return data;
 }
 
-export async function compareCameras(left: string, right: string): Promise<CompareResult> {
+export async function compareCameras(slugs: string[]): Promise<CompareResult> {
   const { data } = await apiClient.get<CompareResult>("/compare/", {
-    params: { left, right },
+    params: { slugs: slugs.join(",") },
+  });
+  return data;
+}
+
+export interface SamplePhotoFilters {
+  lens?: string;
+  focal_length?: string;
+  shutter_speed?: string;
+  aperture?: string;
+  iso?: string;
+}
+
+export async function getSamplePhotos(cameraSlug: string, filters: SamplePhotoFilters = {}): Promise<SamplePhoto[]> {
+  const params = Object.fromEntries(
+    Object.entries(filters).filter(([, v]) => v !== undefined && v !== "")
+  );
+  const { data } = await apiClient.get<SamplePhoto[]>(`/cameras/${cameraSlug}/sample-photos/`, { params });
+  return data;
+}
+
+export async function submitSamplePhoto(formData: FormData): Promise<SamplePhoto> {
+  const { data } = await apiClient.post<SamplePhoto>("/sample-photos/", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
 }

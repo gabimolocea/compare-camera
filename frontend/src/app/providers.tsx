@@ -2,6 +2,7 @@ import { RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { SnackbarProvider } from "./SnackbarContext";
+import { CompareTrayProvider } from "../context/CompareTrayContext";
 import theme from "./theme";
 import router from "./router";
 
@@ -20,7 +21,9 @@ export default function Providers() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <SnackbarProvider>
-          <RouterProvider router={router} />
+          <CompareTrayProvider>
+            <RouterProvider router={router} />
+          </CompareTrayProvider>
         </SnackbarProvider>
       </ThemeProvider>
     </QueryClientProvider>
